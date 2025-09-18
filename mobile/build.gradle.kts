@@ -25,6 +25,7 @@ android {
         compilerOptions.jvmTarget.set(JvmTarget.fromTarget(javaVersion.toString()))
     }
     compileSdk = 36
+    compileSdkMinor = 1
     defaultConfig {
         applicationId = "be.mygod.vpnhotspot"
         minSdk = 28

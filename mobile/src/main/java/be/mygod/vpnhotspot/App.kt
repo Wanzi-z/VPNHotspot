@@ -30,11 +30,10 @@ import be.mygod.vpnhotspot.util.Services
 import be.mygod.vpnhotspot.util.privateLookup
 import be.mygod.vpnhotspot.widget.SmartSnackbar
 import com.google.android.gms.dynamite.DynamiteModule
+import com.google.firebase.analytics.FirebaseAnalytics
 import com.google.firebase.analytics.ParametersBuilder
-import com.google.firebase.analytics.ktx.analytics
 import com.google.firebase.analytics.logEvent
 import com.google.firebase.crashlytics.FirebaseCrashlytics
-import com.google.firebase.ktx.Firebase
 import com.google.firebase.provider.FirebaseInitProvider
 import kotlinx.coroutines.DEBUG_PROPERTY_NAME
 import kotlinx.coroutines.DEBUG_PROPERTY_VALUE_ON
@@ -63,7 +62,7 @@ class App : Application() {
 
         // overhead of debug mode is minimal: https://github.com/Kotlin/kotlinx.coroutines/blob/f528898/docs/debugging.md#debug-mode
         System.setProperty(DEBUG_PROPERTY_NAME, DEBUG_PROPERTY_VALUE_ON)
-        DynamiteModule::class.java.getDeclaredField("zzf").apply { isAccessible = true }.set(null, false)
+        DynamiteModule::class.java.getDeclaredField("zzg").apply { isAccessible = true }.set(null, false)
         // call super.attachInfo get around ProviderInfo check
         FirebaseInitProvider::class.java.privateLookup().findSpecial(ContentProvider::class.java, "attachInfo",
             MethodType.methodType(Void.TYPE, Context::class.java, ProviderInfo::class.java),
@@ -112,7 +111,7 @@ class App : Application() {
      * logException is inappropriate sometimes because it flushes all logs that could be used to investigate other bugs.
      */
     fun logEvent(@Size(min = 1L, max = 40L) event: String, block: ParametersBuilder.() -> Unit = { }) {
-        Firebase.analytics.logEvent(event) {
+        FirebaseAnalytics.getInstance(app).logEvent(event) {
             block(this)
             Timber.i(if (bundle.isEmpty) event else "$event, extras: $bundle")
         }

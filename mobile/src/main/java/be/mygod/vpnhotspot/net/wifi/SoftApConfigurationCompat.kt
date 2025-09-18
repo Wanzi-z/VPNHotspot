@@ -291,10 +291,6 @@ data class SoftApConfigurationCompat(
                 "setBridgedModeOpportunisticShutdownTimeoutMillis", Long::class.java)
         }
         @get:RequiresApi(30)
-        private val setBssid by lazy @TargetApi(30) {
-            SoftApConfiguration.Builder::class.java.getDeclaredMethod("setBssid", MacAddress::class.java)
-        }
-        @get:RequiresApi(30)
         private val setChannel by lazy @TargetApi(30) {
             SoftApConfiguration.Builder::class.java.getDeclaredMethod("setChannel", Int::class.java, Int::class.java)
         }
@@ -331,11 +327,6 @@ data class SoftApConfigurationCompat(
         private val setMaxNumberOfClients by lazy @TargetApi(31) {
             SoftApConfiguration.Builder::class.java.getDeclaredMethod("setMaxNumberOfClients", Int::class.java)
         }
-        @get:RequiresApi(30)
-        private val setPassphrase by lazy @TargetApi(30) {
-            SoftApConfiguration.Builder::class.java.getDeclaredMethod("setPassphrase", String::class.java,
-                Int::class.java)
-        }
         @get:RequiresApi(33)
         private val setRandomizedMacAddress by lazy @TargetApi(33) {
             UnblockCentral.setRandomizedMacAddress(SoftApConfiguration.Builder::class.java)
@@ -351,10 +342,6 @@ data class SoftApConfigurationCompat(
         @get:RequiresApi(33)
         private val setVendorElements by lazy @TargetApi(33) {
             SoftApConfiguration.Builder::class.java.getDeclaredMethod("setVendorElements", List::class.java)
-        }
-        @get:RequiresApi(33)
-        private val setWifiSsid by lazy @TargetApi(33) {
-            SoftApConfiguration.Builder::class.java.getDeclaredMethod("setWifiSsid", WifiSsid::class.java)
         }
 
         @Deprecated("Class deprecated in framework")
@@ -462,7 +449,7 @@ data class SoftApConfigurationCompat(
         @RequiresApi(30)
         fun testPlatformValidity(channels: SparseIntArray) = staticBuilder.setChannelsCompat(channels)
         @RequiresApi(30)
-        fun testPlatformValidity(bssid: MacAddress) = setBssid(staticBuilder, bssid)
+        fun testPlatformValidity(bssid: MacAddress) = staticBuilder.setBssid(bssid)
         @RequiresApi(33)
         fun testPlatformValidity(vendorElements: List<ScanResult.InformationElement>) =
             setVendorElements(staticBuilder, vendorElements)
@@ -540,18 +527,17 @@ data class SoftApConfigurationCompat(
         val builder = if (sac == null) {
             SoftApConfiguration.Builder()
         } else newBuilder.newInstance(sac) as SoftApConfiguration.Builder
-        if (Build.VERSION.SDK_INT >= 33) {
-            setWifiSsid(builder, ssid?.toPlatform())
-        } else setSsid(builder, ssid?.toString())
-        setPassphrase(builder, when (securityType) {
+        if (Build.VERSION.SDK_INT >= 33) builder.setWifiSsid(ssid?.toPlatform()) else setSsid(builder, ssid?.toString())
+        builder.setPassphrase(when (securityType) {
             SoftApConfiguration.SECURITY_TYPE_OPEN,
             SoftApConfiguration.SECURITY_TYPE_WPA3_OWE_TRANSITION,
             SoftApConfiguration.SECURITY_TYPE_WPA3_OWE -> null
             else -> passphrase
         }, securityType)
         builder.setChannelsCompat(channels)
-        setBssid(builder,
-            if (Build.VERSION.SDK_INT < 31 || macRandomizationSetting == RANDOMIZATION_NONE) bssid else null)
+        builder.setBssid(if (Build.VERSION.SDK_INT < 31 || macRandomizationSetting == RANDOMIZATION_NONE) {
+            bssid
+        } else null)
         setMaxNumberOfClients(builder, maxNumberOfClients)
         try {
             setShutdownTimeoutMillis(builder, shutdownTimeoutMillis)

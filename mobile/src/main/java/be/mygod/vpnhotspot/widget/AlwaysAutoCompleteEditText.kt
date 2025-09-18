@@ -12,7 +12,7 @@ import com.google.android.material.textfield.MaterialAutoCompleteTextView
 class AlwaysAutoCompleteEditText @JvmOverloads constructor(
     context: Context,
     attrs: AttributeSet? = null,
-    defStyleAttr: Int = com.google.android.material.R.attr.autoCompleteTextViewStyle,
+    defStyleAttr: Int = androidx.appcompat.R.attr.autoCompleteTextViewStyle,
 ) : MaterialAutoCompleteTextView(context, attrs, defStyleAttr) {
     override fun enoughToFilter() = true
 
